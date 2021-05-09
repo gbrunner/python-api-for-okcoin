@@ -6,7 +6,6 @@ import base64
 import json
 import pandas as pd
 import configparser
-
 import plotly.graph_objects as go
 
 # import pandas as pd
@@ -37,7 +36,7 @@ class Signiture:
         print(config['DEFAULT']['pass_phrase'])
         if pass_phrase == None and config['DEFAULT']['pass_phrase'] == "":
             # print("HERE1")
-            p = getpass.getpass(prompt='Enter your password:')
+            p = getpass.getpass(prompt='Enter your okcoin API pass phrase:')
             self.pass_phrase = p
         else:
             # print("HERE2")
@@ -369,3 +368,18 @@ class Spot(Signiture):
     def get_granularity():
         values = [60, 180, 300, 900, 1800, 3600, 7200, 14400, 21600, 43200, 86400, 604800]
         return values
+
+
+class Fiat(Signiture):
+
+    def get_deposit_history(self):
+        request_path = '/api/account/v3/fiat/deposit/details'
+        return Resp(self.query(GET, request_path))
+
+    def get_channel_info(self):
+        request_path = '/api/account/v3/fiat/channel'
+        return Resp(self.query(GET, request_path))
+
+    def get_withdrawal_history(self):
+        request_path = '/api/account/v3/fiat/withdraw/details'
+        return Resp(self.query(GET, request_path))
