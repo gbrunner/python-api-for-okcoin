@@ -8,8 +8,7 @@ import pandas as pd
 import configparser
 import plotly.graph_objects as go
 
-# import pandas as pd
-# from datetime import datetime
+# documentation following numpy: https://numpydoc.readthedocs.io/en/latest/example.html#example
 
 CONTENT_TYPE = 'Content-Type'
 OK_ACCESS_KEY = 'OK-ACCESS-KEY'
@@ -22,8 +21,26 @@ POST = 'POST'
 REST_API_URL = "https://www.okcoin.com"
 
 
-class Signiture:
-    def __init__(self, config_file='auth.config',
+class _Signature:
+    """
+    The Signature class is a private class that is used to create a signature to that enables users to
+    interface with the okcoin API. It takes as inputs a config file that contains your
+    API_KEY, SECRET_KEY, and an optional PASS_PHRASE. If the PASS_PHRASE is not specified, you
+    will be prompted for it upon instantiating the account object.
+
+
+    Parameters
+    ----------
+    config_file : A file containing the api_key, secret_key, and pass_phrase
+
+    pass_phrase : If a pass_phrase is not specified in the config_file, it can be entered as a separate parameter
+    or you will be prompted to enter it through your Python IDE.
+
+    Attributes
+    ----------
+    """
+
+    def __init__(self, config_file=r'C:\Users\greg6750\Documents\python-api-for-okcoin\okcoin\auth.config',
                  pass_phrase=None):
 
         config = configparser.ConfigParser()
@@ -76,9 +93,9 @@ class Signiture:
         return url[0:-1]
 
     def query(self, type, request_path, body=''):
-        # print(request_path)
-        # print(type)
-        # print(body)
+        #print(request_path)
+        #print(type)
+        #print(body)
         if body != '':
             body = self.__parse_params_to_str(body)
 
@@ -86,31 +103,87 @@ class Signiture:
         # self.get_timestamp()
         print(body)
         signature = self.__get_signature(timestamp, type, request_path, body)
-        # signature = self.__get_signature(timestamp, type, request_path, body)
-        # signature = self.__get_signature(timestamp, type, request_path, '')
+        #signature = self.__get_signature(timestamp, type, request_path, body)
+        #signature = self.__get_signature(timestamp, type, request_path, '')
 
         header = self.__get_header(signature, timestamp)
         # do request
         response = requests.get(self.REST_API_URL + request_path + body,
                                 headers=header)
-        # data=body
+#data=body
 
         return response
 
+class Account(_Signature):
+    """
+    The Account class is used to interface with you okcoin account. If contains functions that
+    return your account value, the assets in contains, and its history. The Account class
+    inherits from the Signature class, which takes as inputs a config file that contains your
+    API_KEY, SECRET_KEY, and an optional PASS_PHRASE. If the PASS_PHRASE is not specified, you
+    will be prompted for it upon instantiating the account object.
 
-class Account(Signiture):
+
+    Parameters
+    ----------
+    config_file : A file containing the api_key, secret_key, and pass_phrase
+
+    pass_phrase : If a pass_phrase is not specified in the config_file, it can be entered as a separate parameter
+    or you will be prompted to enter it through your Python IDE.
+
+    Attributes
+    ----------
+
+    Examples
+    --------
+    These are written in doctest format, and should illustrate how to
+    use the function.
+
+    >>> from okcoin import Account
+    >>> acc = Account(config_file='auth.conf')
+    <okcoin.Account object at 0x00000291A320A288>
+    """
 
     def get_account_type(self):
+        r"""Returns a dictionary of the different acount types and the
+        numerical code that corresponds to them in okcoin.
+
+        Returns
+        -------
+        account_tpye : dict
+            A dictionary of account types (i.e. funding, trading, spot).
+
+        Examples
+        --------
+        >>> account_type = acc.get_account_type()
+        >>> print(account_type)
+        {'spot': 1, 'margin': 5, 'funding': 6}
+        """
         # In Account API
         account_type = {
             'spot': 1,
             'margin': 5,
             'funding': 6
         }
-        # return pd.DataFrame(account_type, index=[0])
+        #return pd.DataFrame(account_type, index=[0])
         return account_type
 
     def get_withdrwal_status(self):
+        r"""Returns a dictionary of the withdrawal status and the
+        numerical code that corresponds to them in okcoin.
+
+        Returns
+        -------
+        withdrawal_status : dict
+            A dictionary of withdrawal status (i.e. cancelled, failed, pending, etc.).
+
+        Examples
+        --------
+        >>> withdrawal_status = acc.get_withdrwal_status()
+        >>> print(withdrawal_status)
+        {'Pending cancel': -3, 'Cancelled': -2, 'Failed': -1, 'Pending': 0, 'Sending': 1, 'Sent': 2,
+        'Awaiting email verification': 3, 'Awaiting manual verification': 4,
+        'Awaiting identity verification': 5}
+        """
         # In Account API
         withdrawal_status = {
             'Pending cancel': -3,
@@ -123,81 +196,341 @@ class Account(Signiture):
             'Awaiting manual verification': 4,
             'Awaiting identity verification': 5
         }
-        # return pd.DataFrame(withdrawal_status, index=[0])
+        #return pd.DataFrame(withdrawal_status, index=[0])
         return withdrawal_status
 
     def get_wallet(self):
+        r"""Retrieves information on the balances of all of the assets that are
+        available or on hold.
+
+        Returns
+        -------
+        account_info : _AccountInfo
+            A custom data structure that enables you to view you wallet as a dataframe,
+            json, or plotly chart.
+
+        Examples
+        --------
+        >>> acc = Account('auth.conf')
+        >>> wallet = acc.get_wallet()
+        >>> print(wallet.r)
+        <Response [200]>
+        >>> print(wallet.json)
+        [{'balance': '0.00071305', 'available': '0.00071305', 'currency': 'BTC', 'hold': '0.00000000'}, {'balance': '793.99043577', 'available': '793.99043577', 'currency': 'STX', 'hold': '0.00000000'}]
+        >>> print(wallet.df)
+                balance     available currency        hold
+        0    0.00071305    0.00071305      BTC  0.00000000
+        1  793.99043577  793.99043577      STX  0.00000000
+        """
         request_path = '/api/account/v3/wallet'
-        body = ''
-        return Resp(self.query(GET, request_path, body))
+        #body = ''
+
+        #resp = _AccountInfo(self.query(GET, request_path, body))
+
+        #fig = go.Figure([go.Bar(x=resp.df['currency'].tolist(), y=resp.df['balance'].tolist())])
+        #fig.update_layout(
+        #    title='Funding Account Assets',
+        #    yaxis_title='Asset',
+        #    xaxis_title='Quantity')
+
+        return _AccountInfo(self.query(GET, request_path)) #, fig
 
     def get_asset_valuation(self, currency='BTC'):
+        r"""Get the valuation of the total assets of the account in btc or fiat currency.
+
+        Parameters
+        ----------
+        currency : 	The valuation according to a certain fiat currency.  The currency
+            can only be one of the following: BTC, USD, CNY, JPY, KRW, RUB.
+            The default unit is BTC.
+
+        Returns
+        -------
+        account_info : _Resp
+            A custom data structure that allows you to view the request status,
+            the request response as json, and the request response as a dataframe.
+
+        Examples
+        --------
+        >>> asset_val = acc.get_asset_valuation('USD')
+        >>> print(asset_val.df)
+        account_type                               0
+        balance                               523.51
+        valuation_currency                       USD
+        timestamp           2021-05-13T02:21:30.061Z
+        """
         request_path = '/api/account/v3/asset-valuation'
-        p = {'valuation_currency': currency}
-        body = json.dumps(p)
-        return Resp(self.query(GET, request_path, body))
+        body = {'valuation_currency': currency}
+
+        return _Resp(self.query(GET, request_path, body))
 
     # Sub account erroring
-    def get_sub_account(self, account_name=None):
+    def get_sub_account(self, account_name=''):
+        r""" Obtains the fund balance information in each sub account in the users okcoint
+        account.
+
+        Parameters
+        ----------
+        account_name : 	The name of the sub-account.
+
+        Returns
+        -------
+        account_info : _Resp
+            A custom data structure that allows you to view the request status,
+            the request response as json, and the request response as a dataframe.
+
+        Examples
+        --------
+        >>> sub_account = acc.get_sub_account()
+        >>> print(sub_account.json)
+        {
+            "data": {
+                "sub_account": "Test",
+                "asset_valuation": 0.00003463,
+                "account_type:futures": [
+                    {
+                        "balance": 0.00000245,
+                        "max_withdraw": 0.00000245,
+                        "currency": "BTC",
+                        "underlying": "BTC_USD",
+                        "equity": 0.00000245
+                    },
+                    {
+                        "balance": 1.053473,
+                        "max_withdraw": 1.053473,
+                        "currency": "XRP",
+                        "underlying": "XRP_USD",
+                        "equity": 1.053473
+                    }
+                ],
+                "account_type:spot": [
+                    {
+                        "balance": 0.000312544038152,
+                        "max_withdraw": 0.000312544038152,
+                        "available": 0.000312544038152,
+                        "currency": "USDT",
+                        "hold": 0
+                    }
+                ]
+            }
+        }
+        """
         request_path = '/api/account/v3/sub-account'
         if account_name:
-            body = {'sub_account': account_name}
-            # body = json.dumps(p)
+            body = {'sub-account':account_name}
+
         else:
             body = {'sub-account': ''}
-            # body = json.dumps(p)
-        return Resp(self.query(GET, request_path, body))
+
+        return _Resp(self.query(GET, request_path, body))
 
     def get_currency(self, token='BTC'):
+        r""" Retrieves information for a single token in your account,
+        including the remaining balance, and the amount available or on hold.
+
+        Parameters
+        ----------
+        token : str
+            The token you are querying.
+
+        Returns
+        -------
+        token_info : _Resp
+            A custom data structure that allows you to view the request status,
+            the request response as json, and the request response as a dataframe.
+
+        Examples
+        --------
+        >>>
+        """
         request_path = '/api/account/v3/wallet/' + token
-        return Resp(self.query(GET, request_path))
+        return _Resp(self.query(GET, request_path))
 
     ## Withdraw or Trade Permission
     def get_funds_transfer(self):
+        r"""This request supports the transfer of funds among your funding account,
+        trading accounts, main account, and sub accounts.
+
+        Returns
+        -------
+        success : bool
+
+        Examples
+        --------
+        >>>
+        """
         pass
 
     ## Withdraw or Trade Permission
     def withdrawal(self):
         pass
 
-    def get_withdrawal_history(self, currency=None):
+    def get_withdrawal_history(self, currency=''):
+        r""" Retrieves the 100 most recent withdrawal records.
+
+        Parameters
+        ----------
+        currency : 	str
+            The currency that was withdrawn.
+
+        Returns
+        -------
+        withdrawal_hist : _Resp
+            A custom data structure that allows you to view the request status,
+            the request response as json, and the request response as a dataframe.
+
+        Examples
+        --------
+        >>>
+        """
         if currency:
             request_path = '/api/account/v3/withdrawal/history/' + currency.lower()
         else:
             request_path = '/api/account/v3/withdrawal/history'
-        return Resp(self.query(GET, request_path))
+        return _Resp(self.query(GET, request_path))
 
     def get_ledger(self):
+        r""" Retrieves the value of your account for the past month.
+
+
+        Returns
+        -------
+        bills : _Resp
+            A custom data structure that allows you to view the request status,
+            the request response as json, and the request response as a dataframe.
+
+        Examples
+        --------
+        >>>
+        """
         request_path = '/api/account/v3/ledger'
-        return Resp(self.query(GET, request_path))
+        return _Resp(self.query(GET, request_path))
 
     def get_deposit_address(self, currency='BTC'):
-        request_path = '/api/account/v3/deposit/address/' + currency.lower()
-        return Resp(self.query(GET, request_path))
+        r""" Retrieves the deposit addresses of currencies, including previously used addresses.
 
-    def get_deposit_history(self, currency='usd'):
-        request_path = '/api/account/v3/deposit/history/' + currency
-        # p = {'currency': currency}
-        # body = json.dumps(p)
-        return Resp(self.query(GET, request_path))  # , body=body)
+        Parameters
+        ----------
+        currency : 	str
+            The currency deposited.
+
+        Returns
+        -------
+        account_info : _Resp
+            A custom data structure that allows you to view the request status,
+            the request response as json, and the request response as a dataframe.
+
+        Examples
+        --------
+        >>>
+        """
+
+        request_path = '/api/account/v3/deposit/address/' + currency.lower()
+        return _Resp(self.query(GET, request_path))
+
+    def get_deposit_history(self, currency='USD'):
+        r""" Retrieves the deposit history of all currencies,
+        up to 100 recent records(Within one year).
+
+        Parameters
+        ----------
+        currency : 	str
+            The currency deposited.
+
+        Returns
+        -------
+        account_info : _Resp
+            A custom data structure that allows you to view the request status,
+            the request response as json, and the request response as a dataframe.
+
+        Examples
+        --------
+        >>>
+        """
+        request_path = '/api/account/v3/deposit/history/'+currency.lower()
+        #p = {'currency': currency}
+        #body = json.dumps(p)
+        return _Resp(self.query(GET, request_path))#, body=body)
 
     def get_currencies(self):
+        r""" This retrieves a list of all currencies.
+
+        Returns
+        -------
+        currency_info : _Resp
+            An object containing the currencies currently supported by okcoin.
+
+        Examples
+        --------
+        >>> currencies = acc.get_currencies()
+        >>> print(currencies)
+        can_internal                     name  ... can_deposit min_withdrawal
+    0             0                US Dollar  ...           1
+    1             0                     Euro  ...           1
+        """
         request_path = '/api/account/v3/currencies'
-        return Resp(self.query(GET, request_path))
+        return _Resp(self.query(GET, request_path))
+
 
     # This is buggy. You need to specify a currency to get anything back
     def get_withdrawal_fees(self, currency='BTC'):
+        r"""
+
+        Parameters
+        ----------
+        account_name : 	str
+            The name of the sub-account.
+
+        Returns
+        -------
+        fee : _Resp
+            An object contianing the min and max fees for the withdrawal of the
+            specified currency.
+
+        Examples
+        --------
+        >>> withdraw_fee = acc.get_withdrawal_fees('STX')
+        >>> print(withdraw_fee.df)
+        min_fee     currency     max_fee
+    0  1.00000000      STX  2.00000000
+        """
         request_path = '/api/account/v3/withdrawal/fee'
         if currency:
-            body = {'currency': currency.lower()}
+            body = {'currency':currency.lower()}
         else:
-            body = ''
-        # body = json.dumps(p)
-        # print(body)
-        return Resp(self.query(GET, request_path, body=body))
+            body=''
+        #body = json.dumps(p)
+        #print(body)
+        return _Resp(self.query(GET, request_path, body=body))
 
     def get_balance_from_ledger(self, df, currency='BTC'):
-        cur = df[df['currency'] == currency]
+        r""" Returns a dataframe and Plotly chart that show the balance
+        of the funding account.
+
+        Parameters
+        ----------
+        df : 	dataframe
+            The dataframe generated by the
+
+        currency : str
+            The currency that you are querying.
+
+        Returns
+        -------
+        balance : _Resp
+            A n object that...
+
+        fig : Plotly chart
+            A plotly chart of the balance of the funding account.
+
+        Examples
+        --------
+        >>> ledger = account.get_ledger()
+        >>> btc_balance = account.get_balance_from_ledger(ledger.df,'BTC')
+        >>> print(btc_balance[0].df)
+        >>> btc_balance[1].show()
+        """
+        cur = df[df['currency']==currency]
         cur_balance = cur.groupby('timestamp')['balance'].max()
         balance = cur_balance.to_frame()
         balance.reset_index(inplace=True)
@@ -216,10 +549,10 @@ class Account(Signiture):
         return balance, fig
 
 
-class Resp:
+class _Resp:
     def __init__(self, r, trading_pair=None):
         try:
-            if type(r.json()) == dict:
+            if type(r.json())==dict:
                 self.df = pd.Series(r.json()).to_frame()
             else:
                 self.df = pd.DataFrame(r.json())
@@ -237,32 +570,76 @@ class Resp:
 
     def as_chart(self):
         fig = go.Figure(data=[go.Candlestick(x=self.df['time'],
-                                             open=self.df['open'],
-                                             high=self.df['high'],
-                                             low=self.df['low'],
-                                             close=self.df['close'])])
+                open=self.df['open'],
+                high=self.df['high'],
+                low=self.df['low'],
+                close=self.df['close'])])
         return fig
 
-
-class Candlestick(Resp):
-    # def __init__(self, trading_pair):
+class _Candlestick(_Resp):
+    #def __init__(self, trading_pair):
     #    self.trading_pair = trading_pair
     def as_chart(self):
-        fig = go.Figure(data=[go.Candlestick(x=self.df['time'],
-                                             open=self.df['open'],
-                                             high=self.df['high'],
-                                             low=self.df['low'],
-                                             close=self.df['close'])])
+        fig = go.Figure(data=[go._Candlestick(x=self.df['time'],
+                open=self.df['open'],
+                high=self.df['high'],
+                low=self.df['low'],
+                close=self.df['close'])])
 
         fig.update_layout(
             title=self.trading_pair,
-            yaxis_title='Price of ' + self.trading_pair.replace('-', ' in '))
+            yaxis_title='Price of ' + self.trading_pair.replace('-',' in '))
 
+        return fig
+
+class _AccountInfo(_Resp):
+    def chart(self, in_dollars=False):
+        if in_dollars:
+            pass
+        else:
+            fig = go.Figure([go.Bar(x=self.df['currency'].tolist(),
+                                    y=self.df['balance'].tolist())])
+            fig.update_layout(
+                title='Account Assets',
+                yaxis_title='Asset',
+                xaxis_title='Quantity')
         return fig
 
 
 ## Spot Trading Account Info
-class Spot(Signiture):
+class Spot(_Signature):
+    """
+    The Spot class is used to interface with you okcoin spot trading account. If contains functions that
+    return your account value and your trading history. It also contains functions that return the current
+    crypto market conditions, such as trading pairs, asset prices, ad asset history. The Spot class
+    inherits from the Signature class, which takes as inputs a config file that contains your
+    API_KEY, SECRET_KEY, and an optional PASS_PHRASE. If the PASS_PHRASE is not specified, you
+    will be prompted for it upon instantiating the account object.
+
+
+    Parameters
+    ----------
+    config_file : A file containing the api_key, secret_key, and pass_phrase
+
+    pass_phrase : If a pass_phrase is not specified in the config_file, it can be entered as a separate parameter
+    or you will be prompted to enter it through your Python IDE.
+
+    Attributes
+    ----------
+
+    Examples
+    --------
+    These are written in doctest format, and should illustrate how to
+    use the function.
+
+    >>> from okcoin import Spot
+    >>> spot = Spot(config_file='auth.conf')
+
+    """
+
+    def get_account_chart(self, df):
+        fig = go.Figure([go.Bar(x=df['currency'].tolist(), y=df['balance'].tolist())])
+        fig.show()
 
     def get_order_status(self):
         # In Spot API
@@ -277,109 +654,146 @@ class Spot(Signiture):
             'Incomplete': 6,
             'Complete': 7
         }
-        # return pd.DataFrame(order_status, index=[0])
+        #return pd.DataFrame(order_status, index=[0])
         return order_status
 
     def get_accounts(self, currency=None):
         request_path = '/api/spot/v3/accounts'
         if currency:
             request_path += "/" + currency.lower()
-        return Resp(self.query(GET, request_path))
+
+        resp = _Resp(self.query(GET, request_path))
+
+        fig = go.Figure([go.Bar(x=resp.df['currency'].tolist(), y=resp.df['balance'].tolist())])
+        fig.update_layout(
+            title='Spot Trading Account Assets',
+            yaxis_title='Asset',
+            xaxis_title='Quantity')
+
+        return resp, fig
 
     def get_ledger(self, currency='BTC'):
         request_path = '/api/spot/v3/accounts'
         request_path += "/" + currency.lower() + "/ledger"
-        return Resp(self.query(GET, request_path))
+        return _Resp(self.query(GET, request_path))
 
     def place_order(self):
         pass
 
     def get_order_list(self, trading_pair='BTC-USDT', state=7):
-        request_path = '/api/spot/v3/orders'  # ?instrument_id='+trading_pair+'&state='+str(state)
+        request_path = '/api/spot/v3/orders'#?instrument_id='+trading_pair+'&state='+str(state)
         # Using the "body" doesn't work
-        body = {'instrument_id': 'BTC-USDT',
-                'state': '7'}
-        return Resp(self.query(GET, request_path, body=body))
+        body = {'instrument_id':'BTC-USDT',
+            'state':'7'}
+        return _Resp(self.query(GET, request_path, body=body))
 
     def get_orders_pending(self, trading_pair='BTC-USDT'):
         request_path = '/api/spot/v3/orders_pending'
-        body = {'instrument_id': trading_pair.lower()}
-        return Resp(self.query(GET, request_path, body=body))
+        body = {'instrument_id':trading_pair.lower()}
+        return _Resp(self.query(GET, request_path, body=body))
 
     def get_order_details(self, order_id, trading_pair='BTC-USDT'):
         request_path = '/api/spot/v3/orders/' + str(order_id)
         body = {'instrument_id': trading_pair.lower()}
-        return Resp(self.query(GET, request_path, body=body))
+        return _Resp(self.query(GET, request_path, body=body))
 
     def get_trade_fee(self):
         request_path = '/api/spot/v3/trade_fee'
-        return Resp(self.query(GET, request_path))
+        return _Resp(self.query(GET, request_path))
 
     def get_filled_orders(self, trading_pair='BTC-USDT'):
         request_path = '/api/spot/v3/fills'
         body = {'instrument_id': trading_pair.lower()}
-        return Resp(self.query(GET, request_path, body=body))
+        return _Resp(self.query(GET, request_path, body=body))
 
     def get_trading_pairs(self):
         request_path = '/api/spot/v3/instruments'
-        return Resp(self.query(GET, request_path))
+        return _Resp(self.query(GET, request_path))
 
-    def get_order_book(self, trading_pair='BTC-USDT', aggregation_depth=None):
+    def get_order_book(self, trading_pair='BTC-USDT',aggregation_depth=None):
         request_path = '/api/spot/v3/instruments/' + trading_pair + '/book'
         if aggregation_depth:
             body = {'depth': str(aggregation_depth)}
         else:
             body = ''
 
-        res = Resp(self.query(GET, request_path, body=body))
+        res = _Resp(self.query(GET, request_path, body=body))
 
-        if res.r.status_code == 200:
+        if res.r.status_code ==200:
             asks = pd.DataFrame(res.json['asks'], columns=['ask price', 'ask size', 'liquidated orders'])
             bids = pd.DataFrame(res.json['bids'], columns=['bid price', 'bid size', 'liquidated orders'])
         return asks, bids
 
     def get_ticker(self):
         request_path = '/api/spot/v3/instruments/ticker'
-        return Resp(self.query(GET, request_path))
+        return _Resp(self.query(GET, request_path))
+
 
     def get_trading_pair_info(self, trading_pair='BTC-USDT'):
         request_path = '/api/spot/v3/instruments/' + trading_pair + '/ticker'
-        return Resp(self.query(GET, request_path))
+        return _Resp(self.query(GET, request_path))
 
     def get_latest_trades(self, trading_pair='STX-USD'):
         request_path = '/api/spot/v3/instruments/' + trading_pair + '/trades'
-        return Resp(self.query(GET, request_path))
+        return _Resp(self.query(GET, request_path))
 
-    # granularity=86400&start=2019-03-19T16:00:00.000Z&end=2019-03-19T16:00:00.000Z
+    #granularity=86400&start=2019-03-19T16:00:00.000Z&end=2019-03-19T16:00:00.000Z
     def get_candlestick_chart(self, trading_pair='STX-USD', start='', end='', granularity=None):
         request_path = '/api/spot/v3/instruments/' + trading_pair + '/candles'
 
         body = {'start': str(start),
-                'end': str(end),
-                'granularity': str(granularity)}
+               'end':str(end),
+               'granularity':str(granularity)}
 
-        res = Candlestick(self.query(GET, request_path, body=body), trading_pair)
+        res = _Candlestick(self.query(GET, request_path, body=body), trading_pair)
 
-        if res.r.status_code == 200:
+        if res.r.status_code ==200:
             res.df = pd.DataFrame(res.json, columns=['time', 'open', 'high', 'low', 'close', 'volume'])
 
         return res
 
     def get_granularity():
-        values = [60, 180, 300, 900, 1800, 3600, 7200, 14400, 21600, 43200, 86400, 604800]
+        values = [60,180,300,900,1800,3600,7200,14400,21600,43200,86400,604800]
         return values
 
+class Fiat(_Signature):
+    """
+    The Fiat class is used to withdraw and deposit money into your okcoin account. It enables you to
+    understand your deposit and withdrawal history. It also enables you to withdraw and deposit currency
+    if you have created an API key that enables trading. The Fiat class
+    inherits from the Signature class, which takes as inputs a config file that contains your
+    API_KEY, SECRET_KEY, and an optional PASS_PHRASE. If the PASS_PHRASE is not specified, you
+    will be prompted for it upon instantiating the account object.
 
-class Fiat(Signiture):
+
+    Parameters
+    ----------
+    config_file : A file containing the api_key, secret_key, and pass_phrase
+
+    pass_phrase : If a pass_phrase is not specified in the config_file, it can be entered as a separate parameter
+    or you will be prompted to enter it through your Python IDE.
+
+    Attributes
+    ----------
+
+    Examples
+    --------
+    These are written in doctest format, and should illustrate how to
+    use the function.
+
+    >>> from okcoin import Fiat
+    >>> fiat = Fiat(config_file='auth.conf')
+
+    """
 
     def get_deposit_history(self):
         request_path = '/api/account/v3/fiat/deposit/details'
-        return Resp(self.query(GET, request_path))
+        return _Resp(self.query(GET, request_path))
 
     def get_channel_info(self):
         request_path = '/api/account/v3/fiat/channel'
-        return Resp(self.query(GET, request_path))
+        return _Resp(self.query(GET, request_path))
 
     def get_withdrawal_history(self):
         request_path = '/api/account/v3/fiat/withdraw/details'
-        return Resp(self.query(GET, request_path))
+        return __Resp(self.query(GET, request_path))
