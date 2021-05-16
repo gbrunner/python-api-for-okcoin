@@ -40,7 +40,7 @@ class _Signature:
     ----------
     """
 
-    def __init__(self, config_file=r'auth.config',
+    def __init__(self, config_file=r'C:\Users\greg6750\Documents\python-api-for-okcoin\okcoin\auth.config',
                  pass_phrase=None):
 
         config = configparser.ConfigParser()

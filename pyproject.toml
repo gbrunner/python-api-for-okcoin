@@ -1,0 +1,8 @@
+[build-system]
+requires = [
+    "plotly>=4.14",
+    "pandas",
+    "requests",
+    "wheel"
+]
+build-backend = "setuptools.build_meta"
