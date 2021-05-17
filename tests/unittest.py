@@ -1,10 +1,12 @@
-import okcoin
+import sys
+sys.path.append(r'C:\Users\greg6750\Documents\python-api-for-okcoin\src')
+
 from okcoin import Account
-from okcoin import Spot
 
 
 
-acc = Account()
+
+acc = Account(r'C:\Users\greg6750\Documents\IPython Notebooks\okcoin\auth.config')
 print(acc)
 
 acc_type = acc.get_account_type()
@@ -24,12 +26,12 @@ print(asset_val.json)
 print(asset_val.df)
 
 curr = acc.get_currency(token='BTC')
-print(curr.r.status)
+print(curr.r)
 print(curr.json)
 print(curr.df)
 
 withdraw_hist = acc.get_withdrawal_history(currency='STX')
-print(withdraw_hist.r.status)
+print(withdraw_hist.r)
 print(withdraw_hist.json)
 print(withdraw_hist.df)
 

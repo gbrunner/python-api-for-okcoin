@@ -3,7 +3,7 @@ import getpass
 import datetime
 import hmac
 import base64
-import json
+#import json
 import pandas as pd
 import configparser
 import plotly.graph_objects as go
@@ -341,7 +341,10 @@ class Account(_Signature):
 
         Examples
         --------
-        >>>
+        >>> curr = acc.get_currency(token='BTC')
+        >>> print(curr.df)
+              balance   available currency        hold
+        0  0.00076409  0.00076409      BTC  0.00000000
         """
         request_path = '/api/account/v3/wallet/' + token
         return _Resp(self.query(GET, request_path))
@@ -381,7 +384,11 @@ class Account(_Signature):
 
         Examples
         --------
-        >>>
+        >>> withdraw_hist = acc.get_withdrawal_history()
+        >>> withdraw_hist.df
+        Empty DataFrame
+        Columns: []
+        Index: []
         """
         if currency:
             request_path = '/api/account/v3/withdrawal/history/' + currency.lower()
@@ -401,7 +408,14 @@ class Account(_Signature):
 
         Examples
         --------
-        >>>
+        >>> ledger = acc.get_ledger()
+        >>> ledger.df
+                   amount       balance  ...            typename                 timestamp
+        0      0.00000611    0.00076409  ...                      2021-05-16T05:41:27.000Z
+        1      0.00000793    0.00075798  ...                      2021-05-15T04:41:24.000Z
+        2      0.00001004    0.00075005  ...                      2021-05-14T04:41:25.000Z
+        3      0.00001777    0.00074001  ...                      2021-05-13T04:41:27.000Z
+        [4 rows x 7 columns]
         """
         request_path = '/api/account/v3/ledger'
         return _Resp(self.query(GET, request_path))
@@ -422,7 +436,14 @@ class Account(_Signature):
 
         Examples
         --------
-        >>>
+        >>> dep_addr = acc.get_deposit_address()
+        >>> dep_addr.json
+        {'code': 404,
+         'data': {},
+         'detailMsg': '',
+         'error_code': '404',
+         'error_message': 'Not Found',
+         'msg': 'Not Found'}
         """
 
         request_path = '/api/account/v3/deposit/address/' + currency.lower()
@@ -445,12 +466,18 @@ class Account(_Signature):
 
         Examples
         --------
-        >>>
+        >>> dep_hist = acc.get_deposit_history()
+        >>> dep_hist.df
+                 amount                updated_at  ...                 timestamp status
+        0  200.00000000  2021-05-11T17:18:21.000Z  ...  2021-05-10T13:09:39.000Z      5
+        1  100.00000000  2021-05-03T17:18:41.000Z  ...  2021-04-30T17:06:11.000Z      5
+        2  100.00000000  2021-04-24T03:13:52.000Z  ...  2021-04-23T13:34:20.000Z      5
+        3  100.00000000  2021-04-12T15:40:51.000Z  ...  2021-04-09T12:22:16.000Z      5
+        [4 rows x 9 columns]
         """
         request_path = '/api/account/v3/deposit/history/'+currency.lower()
-        #p = {'currency': currency}
-        #body = json.dumps(p)
-        return _Resp(self.query(GET, request_path))#, body=body)
+
+        return _Resp(self.query(GET, request_path)))
 
     def get_currencies(self):
         r""" This retrieves a list of all currencies.
@@ -463,10 +490,10 @@ class Account(_Signature):
         Examples
         --------
         >>> currencies = acc.get_currencies()
-        >>> print(currencies)
+        >>> print(currencies.df)
         can_internal                     name  ... can_deposit min_withdrawal
-    0             0                US Dollar  ...           1
-    1             0                     Euro  ...           1
+        0             0                US Dollar  ...           1
+        1             0                     Euro  ...           1
         """
         request_path = '/api/account/v3/currencies'
         return _Resp(self.query(GET, request_path))
@@ -492,7 +519,7 @@ class Account(_Signature):
         >>> withdraw_fee = acc.get_withdrawal_fees('STX')
         >>> print(withdraw_fee.df)
         min_fee     currency     max_fee
-    0  1.00000000      STX  2.00000000
+        0  1.00000000      STX  2.00000000
         """
         request_path = '/api/account/v3/withdrawal/fee'
         if currency:
@@ -528,7 +555,7 @@ class Account(_Signature):
         >>> ledger = account.get_ledger()
         >>> btc_balance = account.get_balance_from_ledger(ledger.df,'BTC')
         >>> print(btc_balance[0].df)
-        >>> btc_balance[1].show()
+        >>> btc_balance[1].write_html('test.html', auto_open=True)
         """
         cur = df[df['currency']==currency]
         cur_balance = cur.groupby('timestamp')['balance'].max()
