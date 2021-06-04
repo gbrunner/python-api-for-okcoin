@@ -614,7 +614,7 @@ class _Candlestick(_Resp):
     #def __init__(self, trading_pair):
     #    self.trading_pair = trading_pair
     def as_chart(self):
-        fig = go.Figure(data=[go._Candlestick(x=self.df['time'],
+        fig = go.Figure(data=[go.Candlestick(x=self.df['time'],
                 open=self.df['open'],
                 high=self.df['high'],
                 low=self.df['low'],
@@ -786,7 +786,7 @@ class Spot(_Signature):
 
         return res
 
-    def get_granularity():
+    def get_granularity(self):
         values = [60,180,300,900,1800,3600,7200,14400,21600,43200,86400,604800]
         return values
 

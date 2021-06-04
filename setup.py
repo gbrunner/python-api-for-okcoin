@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="okcoin-GBRUNNER", # Replace with your own username
-    version="0.0.1",
+    version="0.0.1c",
     author="Gregory Brunner",
     author_email="gregory.brunner@protonmail.com",
     description="A Python package for interfacing with okcoin.",
