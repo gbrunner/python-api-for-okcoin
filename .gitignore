@@ -3,3 +3,7 @@ okcoin/test.py
 okcoin/OLDokcoin.py
 okcoin/http2_test.py
 .idea/
+deprecated/
+dist/
+test.html
+docs/

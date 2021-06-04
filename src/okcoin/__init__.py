@@ -40,7 +40,8 @@ class _Signature:
     ----------
     """
 
-    def __init__(self, config_file=r'C:\Users\greg6750\Documents\python-api-for-okcoin\okcoin\auth.config',
+    def __init__(self,
+                 config_file=r'auth.config',
                  pass_phrase=None):
 
         config = configparser.ConfigParser()
@@ -418,7 +419,13 @@ class Account(_Signature):
         [4 rows x 7 columns]
         """
         request_path = '/api/account/v3/ledger'
-        return _Resp(self.query(GET, request_path))
+        ledger_resp = _Resp(self.query(GET, request_path))
+        ledger_resp.df.amount = ledger_resp.df.amount.astype('float64')
+        ledger_resp.df.balance = ledger_resp.df.balance.astype('float64')
+        ledger_resp.df.fee = ledger_resp.df.fee.astype('float64')
+        ledger_resp.df.ledger_id = ledger_resp.df.ledger_id.astype('int64')
+        ledger_resp.df.timestamp = ledger_resp.df.timestamp.astype('datetime64')
+        return ledger_resp
 
     def get_deposit_address(self, currency='BTC'):
         r""" Retrieves the deposit addresses of currencies, including previously used addresses.
@@ -477,7 +484,7 @@ class Account(_Signature):
         """
         request_path = '/api/account/v3/deposit/history/'+currency.lower()
 
-        return _Resp(self.query(GET, request_path)))
+        return _Resp(self.query(GET, request_path))
 
     def get_currencies(self):
         r""" This retrieves a list of all currencies.
@@ -554,7 +561,7 @@ class Account(_Signature):
         --------
         >>> ledger = account.get_ledger()
         >>> btc_balance = account.get_balance_from_ledger(ledger.df,'BTC')
-        >>> print(btc_balance[0].df)
+        >>> print(btc_balance[0])
         >>> btc_balance[1].write_html('test.html', auto_open=True)
         """
         cur = df[df['currency']==currency]
