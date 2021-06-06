@@ -20,7 +20,7 @@ pass_phrase=YOUR_PASS_PHRASE
 ```
 from okcoin import Account
 acc  = Account('auth.config')
-``
+```
 
 ## Use the API!
 ```
