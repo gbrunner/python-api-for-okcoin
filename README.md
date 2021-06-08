@@ -22,16 +22,16 @@ Your **auth.config** file must contain the following fields:
     [DEFAULT]
     api_key=YOUR_API_KEY
     secret_key=YOUR SECRET_KEY
+    pass_phrase=
 
-Optionally, you can add the ***pass_phrase*** into your **auth.config** file as follows:
+If the ***pass_phrase*** is not included in your **auth.config** file, you will be 
+prompted to enter it when connecting to your account. Optionally, you can 
+add the ***pass_phrase*** into your **auth.config** file as follows:
 
     [DEFAULT]
     api_key=YOUR_API_KEY
     secret_key=YOUR SECRET_KEY
     pass_phrase=YOUR_PASS_PHRASE
-
-If the ***pass_phrase*** is not included in your **auth.config** file, you will be 
-prompted to enter it when connecting to your account.
 
 ## Import classes from ```okcoin```
 ```
