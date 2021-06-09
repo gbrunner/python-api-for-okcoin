@@ -677,6 +677,17 @@ class Spot(_Signature):
 
     def get_order_status(self):
         # In Spot API
+        r""" Returns the status of an order and the numeric value that corresponds to it
+        in the Okcoin API.
+
+        Returns
+        -------
+        order_status : A dictionary object of order status values.
+
+        Examples
+        --------
+        >>> status = spot.get_order_status()
+        """
         order_status = {
             'Failed': -2,
             'Canceled': -1,
@@ -692,6 +703,26 @@ class Spot(_Signature):
         return order_status
 
     def get_accounts(self, currency=None):
+        r""" Returns a list of assets, (with non-zero balance),
+        remaining balance, and amount available in the spot trading account.
+
+        Parameters
+        ----------
+        currency : 	str
+            Optional parameter specifying which asset you want to return
+
+        Returns
+        -------
+        resp : _Resp
+            A query response object that contains the query result as a dictionary or dataframe
+
+        fig : figure
+            A Plotly figure displaying the valuation of the assets in the account
+
+        Examples
+        --------
+        >>>
+        """
         request_path = '/api/spot/v3/accounts'
         if currency:
             request_path += "/" + currency.lower()
@@ -707,6 +738,24 @@ class Spot(_Signature):
         return resp, fig
 
     def get_ledger(self, currency='BTC'):
+        r""" Returns the spot account bills dating back the past 3 months.
+        Pagination is supported and the response is sorted
+        with most recent first in reverse chronological order.
+
+        Parameters
+        ----------
+        currency : 	str
+            Currency being queried
+
+        Returns
+        -------
+        balance : _Resp
+            A query response opbect that contains the query result as a dictionary and as a dataframe
+
+        Examples
+        --------
+        >>>
+        """
         request_path = '/api/spot/v3/accounts'
         request_path += "/" + currency.lower() + "/ledger"
         return _Resp(self.query(GET, request_path))
@@ -715,36 +764,180 @@ class Spot(_Signature):
         pass
 
     def get_order_list(self, trading_pair='BTC-USDT', state=7):
+        r""" Returns This the list of your orders from
+        the most recent 3 months. This request supports paging
+        and is stored according to the order time in chronological
+        order from latest to earliest.
+
+        Parameters
+        ----------
+        trading_pair : str
+            The trading pair that was ordered
+
+        state : int
+            The state of the order, represented as an integer.
+
+
+        Returns
+        -------
+        orders : _Resp
+            A query response object that contains the query result as a dictionary and as a dataframe
+
+        Examples
+        --------
+        >>>
+        """
         request_path = '/api/spot/v3/orders'#?instrument_id='+trading_pair+'&state='+str(state)
         # Using the "body" doesn't work
-        body = {'instrument_id':'BTC-USDT',
-            'state':'7'}
+        body = {'instrument_id':trading_pair,
+            'state':str(state)}
         return _Resp(self.query(GET, request_path, body=body))
 
     def get_orders_pending(self, trading_pair='BTC-USDT'):
+        r""" Returns the list of your current open orders.
+        Pagination is supported and the response
+        is sorted with most recent first in reverse chronological order.
+
+        Parameters
+        ----------
+        trading_pair : str
+            The trading pair that was ordered.
+
+
+        Returns
+        -------
+        orders : _Resp
+            A query response opbect that contains the query result as a dictionary and as a dataframe
+
+
+        Examples
+        --------
+        >>>
+        """
         request_path = '/api/spot/v3/orders_pending'
         body = {'instrument_id':trading_pair.lower()}
         return _Resp(self.query(GET, request_path, body=body))
 
     def get_order_details(self, order_id, trading_pair='BTC-USDT'):
+        r""" Returns order details by order ID.Can get order information for nearly 3 months。
+        Unfilled orders will be kept in record for only
+        two hours after it is canceled.
+
+        Parameters
+        ----------
+        order_id : int
+            The specific order ID that you want to query
+
+        trading_pair : str
+            The trading pair that was ordered
+
+
+        Returns
+        -------
+        orders : _Resp
+            A query response opbect that contains the query result as a dictionary and as a dataframe
+
+
+        Examples
+        --------
+        >>>
+        """
         request_path = '/api/spot/v3/orders/' + str(order_id)
         body = {'instrument_id': trading_pair.lower()}
         return _Resp(self.query(GET, request_path, body=body))
 
     def get_trade_fee(self):
+        r""" Returns the transaction fee rate corresponding to
+        your current account transaction level. The sub-account
+        rate under the parent account
+        is the same as the parent account.
+        Update every day at 0am
+
+        Returns
+        -------
+        fee : _Resp
+            A query response opbect that contains the query result as a dictionary and as a dataframe
+
+
+        Examples
+        --------
+        >>>
+        """
         request_path = '/api/spot/v3/trade_fee'
         return _Resp(self.query(GET, request_path))
 
     def get_filled_orders(self, trading_pair='BTC-USDT'):
+        r""" Returns recently filled transaction details.
+        This request supports paging and is stored according
+        to the transaction time in chronological order from
+        latest to earliest.
+        Data for up to 3 months can be retrieved.
+
+        Parameters
+        ----------
+        trading_pair : 	str
+            The trading pair that was ordered
+
+
+        Returns
+        -------
+        orders : _Resp
+            A query response opbect that contains the query result as a dictionary and as a dataframe
+
+        Examples
+        --------
+        >>>
+        """
         request_path = '/api/spot/v3/fills'
         body = {'instrument_id': trading_pair.lower()}
         return _Resp(self.query(GET, request_path, body=body))
 
     def get_trading_pairs(self):
+        r""" Returns snapshots of market data and is publicly
+        accessible without account authentication. Retrieves
+        list of trading pairs, trading limit, and unit increment.
+
+
+        Returns
+        -------
+        trading_pairs : dict
+            A dictionary of trading pairs available on Okcoin.
+
+        Examples
+        --------
+        >>>
+        """
         request_path = '/api/spot/v3/instruments'
         return _Resp(self.query(GET, request_path))
 
-    def get_order_book(self, trading_pair='BTC-USDT',aggregation_depth=None):
+    def get_order_book(self, trading_pair='BTC-USDT',
+                       aggregation_depth=None):
+        r""" Returns a trading pair's order book. Pagination is not
+        supported here; the entire orderbook will be
+        returned per request. This is publicly accessible
+        without account authentication.
+
+        Parameters
+        ----------
+        trading_pair : str
+            The traiding pair you are interested in
+
+        aggregation_depth : int
+            Aggregation of orders within a price range
+
+
+        Returns
+        -------
+        asks : dataframe
+            The asking information from the order book
+
+        bids : dataframe
+            The bid information from the order book
+
+        Examples
+        --------
+        >>>
+        """
         request_path = '/api/spot/v3/instruments/' + trading_pair + '/book'
         if aggregation_depth:
             body = {'depth': str(aggregation_depth)}
@@ -759,20 +952,94 @@ class Spot(_Signature):
         return asks, bids
 
     def get_ticker(self):
+        r""" Returns the latest price snapshot, best bid/ask price,
+        and trading volume in the last 24 hours for all trading pairs.
+        This is publicly accessible without account authentication.
+
+        Returns
+        -------
+        tickers : _Resp
+            A query response object that contains the query result as a dictionary and as a dataframe
+
+        Examples
+        --------
+        >>>
+        """
         request_path = '/api/spot/v3/instruments/ticker'
         return _Resp(self.query(GET, request_path))
 
 
     def get_trading_pair_info(self, trading_pair='BTC-USDT'):
+        r""" Returns the latest price snapshot,
+        best bid/ask price, and trading volume in the last 24
+        hours for a particular trading pair.
+        This is publicly accessible without account authentication.
+
+        Parameters
+        ----------
+        trading_pair : str
+            The trading pair you are interested in
+
+
+        Returns
+        -------
+        trading_pair_info : _Resp
+            A query response object that contains the query result as a dictionary and as a dataframe
+
+
+        Examples
+        --------
+        >>>
+        """
         request_path = '/api/spot/v3/instruments/' + trading_pair + '/ticker'
         return _Resp(self.query(GET, request_path))
 
     def get_latest_trades(self, trading_pair='STX-USD'):
+        r""" Retrieve the latest 100 transactions of a
+        trading pair.
+
+        Parameters
+        ----------
+        trading_pair : str
+            The trading pair you are interested in
+
+
+        Returns
+        -------
+        latest_trades : _Resp
+            A query response object that contains the query result as a dictionary and as a dataframe
+
+
+        Examples
+        --------
+        >>>
+        """
         request_path = '/api/spot/v3/instruments/' + trading_pair + '/trades'
         return _Resp(self.query(GET, request_path))
 
     #granularity=86400&start=2019-03-19T16:00:00.000Z&end=2019-03-19T16:00:00.000Z
     def get_candlestick_chart(self, trading_pair='STX-USD', start='', end='', granularity=None):
+        r""" Returns the candlestick charts of the trading pairs.
+        This API can retrieve the latest 1440 entries of data.
+        Candlesticks are returned in groups based on
+        requested granularity.
+        Maximum of 1440 entries can be retrieved.
+
+        Parameters
+        ----------
+        trading_pair : str
+            The trading pair you are interested in
+
+
+        Returns
+        -------
+        candlestick_chart : _Candlestick
+            A candlestick chart
+
+        Examples
+        --------
+        >>>
+        """
         request_path = '/api/spot/v3/instruments/' + trading_pair + '/candles'
 
         body = {'start': str(start),
@@ -787,6 +1054,19 @@ class Spot(_Signature):
         return res
 
     def get_granularity(self):
+        r""" Returns a list of intervals that can be used to
+        generating candlestick charts.
+
+
+        Returns
+        -------
+        values : list
+            A list of all possible granularity intervals
+
+        Examples
+        --------
+        >>> spot.get_granularity()
+        """
         values = [60,180,300,900,1800,3600,7200,14400,21600,43200,86400,604800]
         return values
 
@@ -820,14 +1100,69 @@ class Fiat(_Signature):
 
     """
 
-    def get_deposit_history(self):
+    def get_deposit_history(self, deposit_id):
+        r""" Returns the details of a deposit given the
+        deposit ID.
+
+        Parameters
+        ----------
+        deposit_id : str
+            The dataframe generated by the
+
+
+        Returns
+        -------
+        deposit_hist : _Resp
+            A query response object that contains the query result as a dictionary and as a dataframe
+
+
+        Examples
+        --------
+        >>>
+        """
         request_path = '/api/account/v3/fiat/deposit/details'
         return _Resp(self.query(GET, request_path))
 
     def get_channel_info(self):
+        r""" Returns the status of an order and the numeric value that corresponds to it
+        in the Okcoin API.
+
+        Parameters
+        ----------
+        df : 	dataframe
+            The dataframe generated by the
+
+
+        Returns
+        -------
+        balance : _Resp
+            A n object that...
+
+        Examples
+        --------
+        >>>
+        """
         request_path = '/api/account/v3/fiat/channel'
         return _Resp(self.query(GET, request_path))
 
     def get_withdrawal_history(self):
+        r""" Returns the status of an order and the numeric value that corresponds to it
+        in the Okcoin API.
+
+        Parameters
+        ----------
+        df : 	dataframe
+            The dataframe generated by the
+
+
+        Returns
+        -------
+        balance : _Resp
+            A n object that...
+
+        Examples
+        --------
+        >>>
+        """
         request_path = '/api/account/v3/fiat/withdraw/details'
         return __Resp(self.query(GET, request_path))
