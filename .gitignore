@@ -7,3 +7,5 @@ deprecated/
 dist/
 test.html
 docs/
+*.html
+*.pyc

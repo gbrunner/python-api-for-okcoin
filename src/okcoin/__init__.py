@@ -721,7 +721,8 @@ class Spot(_Signature):
 
         Examples
         --------
-        >>>
+        >>> accounts = spot.get_accounts()
+        >>> accounts[1].write_html('temp.html', auto_open=True)
         """
         request_path = '/api/spot/v3/accounts'
         if currency:
@@ -754,7 +755,8 @@ class Spot(_Signature):
 
         Examples
         --------
-        >>>
+        >>> currency = spot.get_ledger('USD')
+        >>> currency.df
         """
         request_path = '/api/spot/v3/accounts'
         request_path += "/" + currency.lower() + "/ledger"
@@ -785,7 +787,8 @@ class Spot(_Signature):
 
         Examples
         --------
-        >>>
+        >>> orders = spot.get_order_list('STX-USD')
+        >>> orders.df
         """
         request_path = '/api/spot/v3/orders'#?instrument_id='+trading_pair+'&state='+str(state)
         # Using the "body" doesn't work
@@ -793,7 +796,7 @@ class Spot(_Signature):
             'state':str(state)}
         return _Resp(self.query(GET, request_path, body=body))
 
-    def get_orders_pending(self, trading_pair='BTC-USDT'):
+    def get_orders_pending(self, trading_pair='BTC-USD'):
         r""" Returns the list of your current open orders.
         Pagination is supported and the response
         is sorted with most recent first in reverse chronological order.
@@ -812,7 +815,8 @@ class Spot(_Signature):
 
         Examples
         --------
-        >>>
+        >>> pending = spot.get_orders_pending('STX-USD')
+        >>> pending.df
         """
         request_path = '/api/spot/v3/orders_pending'
         body = {'instrument_id':trading_pair.lower()}
@@ -840,7 +844,8 @@ class Spot(_Signature):
 
         Examples
         --------
-        >>>
+        >>> details = spot.get_order_details(order_id, 'BTC-USD')
+        >>> details.df
         """
         request_path = '/api/spot/v3/orders/' + str(order_id)
         body = {'instrument_id': trading_pair.lower()}
@@ -861,7 +866,9 @@ class Spot(_Signature):
 
         Examples
         --------
-        >>>
+        >>> fees = spot.get_trade_fee()
+        >>> fees.json
+        {'category': '1', 'maker': '0.001', 'taker': '0.002', 'timestamp': '2021-06-11T02:41:44.149Z'}
         """
         request_path = '/api/spot/v3/trade_fee'
         return _Resp(self.query(GET, request_path))
@@ -886,7 +893,11 @@ class Spot(_Signature):
 
         Examples
         --------
-        >>>
+        >>> filled = spot.get_filled_orders('STX-USD')
+        >>> filled.df
+                  created_at        currency  ...                 timestamp trade_id
+        0   2021-04-02T15:20:37.000Z      USD  ...  2021-04-02T15:20:37.000Z   103932
+        1   2021-04-02T15:20:37.000Z      BTC  ...  2021-04-02T15:20:37.000Z   103932
         """
         request_path = '/api/spot/v3/fills'
         body = {'instrument_id': trading_pair.lower()}
