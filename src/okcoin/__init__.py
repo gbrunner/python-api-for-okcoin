@@ -916,7 +916,12 @@ class Spot(_Signature):
 
         Examples
         --------
-        >>>
+        >>> trading_pairs = spot.get_trading_pairs()
+        >>> trading_pairs.df
+           base_currency category  ... size_increment   tick_size
+        0            BTC        1  ...         0.0001        0.01
+        1            LTC        1  ...         0.0001        0.01
+        2            ETH        1  ...         0.0001        0.01
         """
         request_path = '/api/spot/v3/instruments'
         return _Resp(self.query(GET, request_path))
@@ -947,7 +952,15 @@ class Spot(_Signature):
 
         Examples
         --------
-        >>>
+        >>> order_book = spot.get_order_book('BTC-USD')
+        >>> order_book[0]
+            ask price ask size liquidated orders
+        0    36417.66   0.0467                 1
+        1    36419.84   0.0824                 1
+        >>> order_book[1]
+            bid price bid size liquidated orders
+        0    36410.06     0.83                 1
+        1    36407.01    0.055                 1
         """
         request_path = '/api/spot/v3/instruments/' + trading_pair + '/book'
         if aggregation_depth:
@@ -974,7 +987,27 @@ class Spot(_Signature):
 
         Examples
         --------
-        >>>
+        >>> trading_pair_info = spot.get_trading_pair_info('STX-BTC')
+        >>> trading_pair_info.df
+                                                 0
+        best_ask                         0.0000235
+        best_bid                        0.00002337
+        instrument_id                      STX-BTC
+        open_utc0                       0.00002371
+        open_utc8                       0.00002459
+        product_id                         STX-BTC
+        last                            0.00002349
+        last_qty                                 0
+        ask                              0.0000235
+        best_ask_size                1764.45104535
+        bid                             0.00002337
+        best_bid_size                2616.60777493
+        open_24h                          0.000025
+        high_24h                        0.00002635
+        low_24h                         0.00002349
+        base_volume_24h             99608.17221013
+        timestamp         2021-06-12T01:47:03.609Z
+        quote_volume_24h                2.43517342
         """
         request_path = '/api/spot/v3/instruments/ticker'
         return _Resp(self.query(GET, request_path))
@@ -1000,7 +1033,8 @@ class Spot(_Signature):
 
         Examples
         --------
-        >>>
+        >>> trading_pair_info = spot.get_trading_pair_info('STX-BTC')
+        >>> trading_pair_info.df
         """
         request_path = '/api/spot/v3/instruments/' + trading_pair + '/ticker'
         return _Resp(self.query(GET, request_path))
@@ -1023,7 +1057,11 @@ class Spot(_Signature):
 
         Examples
         --------
-        >>>
+        >>> trades = spot.get_latest_trades()
+        >>> trades.df
+                        time                 timestamp  ...                size  side
+        0   2021-06-12T01:40:54.059Z  2021-06-12T01:40:54.059Z  ...  270.588235   buy
+        1   2021-06-12T01:38:41.972Z  2021-06-12T01:38:41.972Z  ...        1000  sell
         """
         request_path = '/api/spot/v3/instruments/' + trading_pair + '/trades'
         return _Resp(self.query(GET, request_path))
@@ -1049,7 +1087,8 @@ class Spot(_Signature):
 
         Examples
         --------
-        >>>
+        >>> candles = spot.get_candlestick_chart('BTC-USD', granularity=60)
+        >>> candles.as_chart().write_html("test.html", auto_open = True)
         """
         request_path = '/api/spot/v3/instruments/' + trading_pair + '/candles'
 
