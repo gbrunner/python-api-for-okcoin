@@ -850,6 +850,124 @@ class Spot(_Signature):
         body = {'instrument_id': trading_pair.lower()}
         return _Resp(self.query(GET, request_path, body=body))
 
+class Earn(_Signature):
+    """
+    The Earn class is used to learn about yeild bearing offers on Okcoin and place orders.
+
+
+
+        Parameters
+        ----------
+        config_file : A file containing the api_key, secret_key, and pass_phrase
+
+        pass_phrase : If a pass_phrase is not specified in the config_file, it can be entered as a separate parameter
+        or you will be prompted to enter it through your Python IDE.
+
+        Attributes
+        ----------
+
+        Examples
+        --------
+        These are written in doctest format, and should illustrate how to
+        use the function.
+
+        >>> from okcoin import Earn
+        >>> earn = Earn(config_file='auth.conf')
+
+        """
+    def get_offers(self, investment_currency="MIA", protocol_name="MiamiCoin"):
+        r""" Returns the listing of offerings on Okcoin Earn.
+
+        Parameters
+        ----------
+        investment_currency : 	str
+            The currency you want to stake
+
+        protocol_name : str
+            The protocal listed for the currency
+
+
+        Returns
+        -------
+        orders : _Resp
+            A query response opbect that contains the query result as a dictionary and as a dataframe
+
+        Examples
+        --------
+        >>> offers = earn.get_offers("STX", "stacks")
+        >>> offers.df
+        max_invest_amount min_invest_amount  ... annual_interest_rate protocol_name
+        0                         50.00000000  ...               0.1000        stacks
+        [1 rows x 10 columns]
+        """
+        request_path = '/api/earning/v3/offers'
+        body = {'investment_currency': investment_currency.upper(),
+                'protocol_name': protocol_name}
+        return _Resp(self.query(GET, request_path, body=body))
+
+    def get_positions(self, investment_currency="MIA", protocol_name="MiamiCoin"):
+        r""" Returns the the list of your assets currently earning yeild.
+
+        Parameters
+        ----------
+        investment_currency : 	str
+            The currency you want to stake
+
+        protocol_name : str
+            The protocal listed for the currency
+
+
+        Returns
+        -------
+        orders : _Resp
+            A query response opbect that contains the query result as a dictionary and as a dataframe
+
+        Examples
+        --------
+        >>> positions = earn.get_positions("STX", "stacks")
+        >>> positions.df
+        """
+        request_path = '/api/earning/v3/positions'
+        body = {'investment_currency': investment_currency.upper(),
+                'protocol_name': protocol_name}
+        return _Resp(self.query(GET, request_path, body=body))
+
+    def get_order_details(self, investment_currency="STX", protocol_name="stacks", status=None):
+        r""" Returns the last 100 orders placed into Earn.
+
+        Parameters
+        ----------
+        investment_currency : 	str
+            The currency you want to stake
+
+        protocol_name : str
+            The protocal listed for the currency
+
+        status : int
+            An integer representing the status. This can be retrieved from the
+            earn.status dictionary object.
+
+        Returns
+        -------
+        orders : _Resp
+            A query response opbect that contains the query result as a dictionary and as a dataframe
+
+        Examples
+        --------
+        >>> orders = earn.get_positions("STX", "stacks")
+        >>> orders.df
+        """
+        request_path = '/api/earning/v3/orders'
+        if status:
+            body = {'investment_currency': investment_currency.upper(),
+                'protocol_name': protocol_name,
+                'status':status}
+        else:
+            body = {'investment_currency': investment_currency.upper(),
+                    'protocol_name': protocol_name}
+        return _Resp(self.query(GET, request_path, body=body))
+
+
 
 class Fiat(_Signature):
     """
