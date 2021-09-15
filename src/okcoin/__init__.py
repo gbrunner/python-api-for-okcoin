@@ -905,6 +905,42 @@ class Earn(_Signature):
                 'protocol_name': protocol_name}
         return _Resp(self.query(GET, request_path, body=body))
 
+    def deposit(self, investment_currency="MIA", protocol_name="MiamiCoin", amount=50, cycles=1):
+        r""" Returns the listing of offerings on Okcoin Earn.
+
+        Parameters
+        ----------
+        investment_currency : 	str
+            The currency you want to stake
+
+        protocol_name : str
+            The protocal listed for the currency
+
+        amount : float
+            The amount you want to deposit
+
+        cycles : int
+            The number of staking cycles, usually 1 or 12
+
+
+        Returns
+        -------
+        orders : _Resp
+            A query response opbect that contains the query result as a dictionary and as a dataframe
+
+        Examples
+        --------
+        >>> deposit = earn.get_offers("STX", "stacks", 100, 12)
+        >>> deposit.df
+        """
+        request_path = '/api/earning/v3/purchase'
+        body = {'investment_currency': investment_currency.upper(),
+                'protocol_name': protocol_name,
+                'amount':str(amount),
+                'cycles':str(cycles)}
+        return _Resp(self.query(GET, request_path, body=body))
+
+
     def get_positions(self, investment_currency="MIA", protocol_name="MiamiCoin"):
         r""" Returns the the list of your assets currently earning yeild.
 
@@ -932,7 +968,7 @@ class Earn(_Signature):
                 'protocol_name': protocol_name}
         return _Resp(self.query(GET, request_path, body=body))
 
-    def get_order_details(self, investment_currency="STX", protocol_name="stacks", status=None):
+    def get_order_details(self, investment_currency=None, protocol_name=None, status=None):
         r""" Returns the last 100 orders placed into Earn.
 
         Parameters
@@ -958,15 +994,32 @@ class Earn(_Signature):
         >>> orders.df
         """
         request_path = '/api/earning/v3/orders'
-        if status:
+        if investment_currency:
+            body = {'investment_currency': investment_currency.upper()}
+        elif investment_currency and protocol_name:
+            body = {'investment_currency': investment_currency.upper(),
+                    'protocol_name': protocol_name}
+        elif status and investment_currency and protocol_name:
             body = {'investment_currency': investment_currency.upper(),
                 'protocol_name': protocol_name,
                 'status':status}
         else:
-            body = {'investment_currency': investment_currency.upper(),
-                    'protocol_name': protocol_name}
-        return _Resp(self.query(GET, request_path, body=body))
+            body = ""
 
+        resp = _Resp(self.query(GET, request_path, body=body))
+        resp.df.replace({"status": self.order_status()},inplace=True)
+        return resp
+        #return _Resp(self.query(GET, request_path, body=body))
+
+    def order_status(self):
+        return {'8': 'Pending',
+            '13': 'Cancelling',
+            '17': 'Cancelled',
+            '9': 'Onchain',
+            '1': 'Earning',
+            '4': 'Redeem Pending',
+            '2': 'Redeeming',
+            '3': 'Redeemed'}
 
 
 class Fiat(_Signature):
