@@ -1,3 +1,5 @@
+import json
+
 import requests
 import getpass
 import datetime
@@ -101,8 +103,12 @@ class _Signature:
         #print(request_path)
         #print(type)
         #print(body)
-        if body != '':
-            body = self.__parse_params_to_str(body)
+        if type == "POST":
+            body = json.dumps(body)
+            print(body)
+        else:
+            if body != '':
+                body = self.__parse_params_to_str(body)
 
         timestamp = datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + "Z"
         # self.get_timestamp()
@@ -113,8 +119,14 @@ class _Signature:
 
         header = self.__get_header(signature, timestamp)
         # do request
-        response = requests.get(self.REST_API_URL + request_path + body,
+        if type == 'GET':
+            response = requests.get(self.REST_API_URL + request_path + body,
                                 headers=header)
+        else:
+            print(self.REST_API_URL + request_path)
+            response = requests.post(self.REST_API_URL + request_path, data=body,
+                                    headers=header)
+
 #data=body
 
         return response
@@ -709,10 +721,108 @@ class Spot(_Signature):
         request_path += "/" + currency.lower() + "/ledger"
         return _Resp(self.query(GET, request_path))
 
-    def place_order(self):
-        pass
+    def place_order(self,
+                    side='buy',
+                    trading_pair='STX-USD',
+                    order_type='0',
+                    limit_or_market='limit',
+                    size='',
+                    price='',
+                    amount_to_spend='',
+                    client_id=''):
+        r""" Returns This the list of your orders from
+        the most recent 3 months. This request supports paging
+        and is stored according to the order time in chronological
+        order from latest to earliest.
 
-    def get_order_list(self, trading_pair='BTC-USDT', state=7):
+        Parameters
+        ----------
+        side : str
+            'buy' or 'sell'
+
+        trading_pair : str
+            The trading pair that was ordered
+
+        order_type='0',
+            Specify 0: Normal order (Unfilled and 0 imply normal limit order) 1:
+            Post only 2: Fill or Kill 3: Immediate Or Cancel
+
+        limit_or_market : str
+            'limit' or 'market' order
+
+        size : float
+            Quantity to be sold. Required for market sells or limit buys.
+
+        price : float
+            The price you want to purchase the asset at
+
+        amount_to_spend : float
+            Amount to spend. Required for market buys.
+
+        client_id : str
+            A user defined ID that you can give your order
+
+
+        Returns
+        -------
+        orders : _Resp
+            A query response object that contains the query result as a dictionary and as a dataframe
+
+        Examples
+        --------
+        >>> order = spot.place_order('buy', 'MIA-USD','0','limit',1000, .04)
+        >>> order.df
+        """
+        request_path = '/api/spot/v3/orders'#?instrument_id='+trading_pair+'&state='+str(state)
+        # Using the "body" doesn't work
+
+        if limit_or_market == 'market':
+            body = {'side': side,
+                 'instrument_id': trading_pair,
+                 'order_type': order_type,
+                 'type': 'market',
+                 'size':str(size),
+                 'notional': str(amount_to_spend),
+                 'client_id': client_id}
+        else:
+            body = {'side':side,
+                'instrument_id':trading_pair,
+                'order_type':order_type,
+                'type':'limit',
+                'size':str(size),
+                'price': str(price),
+                'client_id':client_id}
+
+        return _Resp(self.query(POST, request_path, body=body))
+
+    def cancel_order(self, order_id, trading_pair):
+        r""" Cancels an existing trade.
+
+                Parameters
+                ----------
+                order_id : str
+                    The ID for the order you would like to cancel.
+
+                trading_pair : str
+                    The trading pair that was ordered.
+
+
+                Returns
+                -------
+                orders : _Resp
+                    A query response object that contains the query result as a dictionary and as a dataframe
+
+                Examples
+                --------
+                >>> order = spot.cancel_order('5468800', 'MIA-USD')
+                >>> order.df
+                """
+        request_path = '/api/spot/v3/cancel_orders'#?instrument_id='+trading_pair+'&state='+str(state)
+        body = {'instrument_id': trading_pair.lower()}
+
+        return _Resp(self.query(POST, request_path + '/' + str(order_id), body=body))
+
+    def get_order_list(self, trading_pair='STX-USD', state=0):
         r""" Returns This the list of your orders from
         the most recent 3 months. This request supports paging
         and is stored according to the order time in chronological
@@ -738,9 +848,8 @@ class Spot(_Signature):
         >>> orders.df
         """
         request_path = '/api/spot/v3/orders'#?instrument_id='+trading_pair+'&state='+str(state)
-        # Using the "body" doesn't work
-        body = {'instrument_id':trading_pair,
-            'state':str(state)}
+        body = {'instrument_id': trading_pair,
+                'state': str(state)}
         return _Resp(self.query(GET, request_path, body=body))
 
     def get_orders_pending(self, trading_pair='BTC-USD'):
@@ -935,10 +1044,10 @@ class Earn(_Signature):
         """
         request_path = '/api/earning/v3/purchase'
         body = {'investment_currency': investment_currency.upper(),
-                'protocol_name': protocol_name,
+                'protocol_name': protocol_name.lower(),
                 'amount':str(amount),
                 'cycles':str(cycles)}
-        return _Resp(self.query(GET, request_path, body=body))
+        return _Resp(self.query(POST, request_path, body=body))
 
 
     def get_positions(self, investment_currency="MIA", protocol_name="MiamiCoin"):
