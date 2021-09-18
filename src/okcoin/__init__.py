@@ -1,11 +1,9 @@
-import json
-
 import requests
+import json
 import getpass
 import datetime
 import hmac
 import base64
-#import json
 import pandas as pd
 import configparser
 import plotly.graph_objects as go
@@ -1049,6 +1047,27 @@ class Earn(_Signature):
                 'cycles':str(cycles)}
         return _Resp(self.query(POST, request_path, body=body))
 
+    def cancel(self, order_id):
+        r""" Cancel a deposit order that has been placed on Earn.
+
+        Parameters
+        ----------
+        order_id : 	str
+            The ID of the order to cancel.
+
+        Returns
+        -------
+        orders : _Resp
+            A query response opbect that contains the query result as a dictionary and as a dataframe
+
+        Examples
+        --------
+        >>> order = earn.cancel("1234")
+        >>> order.df
+        """
+        request_path = '/api/earning/v3/cancel'
+        body = {'order_id': str(order_id)}
+        return _Resp(self.query(POST, request_path, body=body))
 
     def get_positions(self, investment_currency="MIA", protocol_name="MiamiCoin"):
         r""" Returns the the list of your assets currently earning yeild.
@@ -1119,6 +1138,45 @@ class Earn(_Signature):
         resp.df.replace({"status": self.order_status()},inplace=True)
         return resp
         #return _Resp(self.query(GET, request_path, body=body))
+
+    def redeem_order(self, order_id, early_redemption_permit=False):
+        r""" Redeeming flexible or fixed orders from Earn. This function only takes one order at a time.
+        This will be updated to take a list of orders.
+
+        Parameters
+        ----------
+        order_id : 	str or list
+            The order(s) to redeem. If it is a single order, the order_id should be a string, for example, '1234'.
+            If it is multiple orders, the order_id should be a list of string, for example, ['1234', '2345', '3456']
+
+        early_redemption_permit : bool
+            Permission for early redemption. Set to false by default. If submitting multiple orders, the single
+            value will be applied to all orders.
+
+        Returns
+        -------
+        orders : _Resp
+            A query response opbect that contains the query result as a dictionary and as a dataframe
+
+        Examples
+        --------
+        >>> redeem = earn.redeem_order("oid1234",True)
+        >>> redeem.df
+        """
+        request_path = '/api/earning/v3/redeem'
+
+        if type(order_id) == str:
+            body = [{'order_id': order_id,
+                    'early_redemption_permit':str(early_redemption_permit)}]
+        elif type(order_id) == list:
+            body = []
+            for oid in order_ids:
+                body.append({'order_id': str(oid),
+                            'early_redemption_permit': str(early_redemption_permit).lower()})
+        else:
+            print('ERROR: order_id is not a list or a string.')
+
+        return _Resp(self.query(POST, request_path, body=body))
 
     def order_status(self):
         return {'8': 'Pending',
