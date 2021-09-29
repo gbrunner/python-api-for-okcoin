@@ -200,7 +200,7 @@ def get_latest_trades(trading_pair='STX-USD'):
         return res
 
 
-def get_candlestick_chart(trading_pair='STX-USD', start='', end='', granularity=None):
+def get_candlestick_chart(trading_pair='STX-USD', start=None, end=None, granularity=604800):
     r""" Returns the candlestick charts of the trading pairs.
     This API can retrieve the latest 1440 entries of data.
     Candlesticks are returned in groups based on
@@ -221,16 +221,21 @@ def get_candlestick_chart(trading_pair='STX-USD', start='', end='', granularity=
     Examples
     --------
     >>> from okcoin import ticker
-    >>> candles = ticker.get_candlestick_chart('BTC-USD', granularity=60)
+    >>> candles = ticker.get_candlestick_chart('BTC-USD', granularity=604800)
     >>> candles.as_chart().write_html("test.html", auto_open = True)
     """
     request_path = OKCOIN_URL + '/api/spot/v3/instruments/' + trading_pair + '/candles'
 
-    body = {'start': str(start),
-           'end':str(end),
-           'granularity':str(granularity)}
+    if start != None and end != None:
+        body = {'start': str(start),
+               'end':str(end),
+               'granularity':str(granularity)}
+    else:
+        body = {
+            'granularity': str(granularity)
+        }
 
-    res = _Candlestick(requests.get(request_path),trading_pair)
+    res = _Candlestick(requests.get(request_path,params=body),trading_pair)
 
     if res.r.status_code ==200:
         res.df = pd.DataFrame(res.json, columns=['time', 'open', 'high', 'low', 'close', 'volume'])

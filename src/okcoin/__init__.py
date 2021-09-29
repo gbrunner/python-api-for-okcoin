@@ -5,6 +5,7 @@ import datetime
 import hmac
 import base64
 import pandas as pd
+import numpy as np
 import configparser
 import plotly.graph_objects as go
 
@@ -380,8 +381,15 @@ class Account(_Signature):
         pass
 
     ## Withdraw or Trade Permission
-    def withdrawal(self):
-        pass
+    def withdraw(self, currency, amount, destination, to_address, trade_pwd, fee):
+        body = {'currency': currency,
+                  'amount': amount,
+                  'destination': destination,
+                  'to_address': to_address,
+                  'trade_pwd': trade_pwd,
+                  'fee': fee}
+        request_path = '/api/account/v3/withdrawal'
+        return _Resp(self.query(POST, request_path, body=body))
 
     def get_withdrawal_history(self, currency=''):
         r""" Retrieves the 100 most recent withdrawal records.
@@ -469,6 +477,49 @@ class Account(_Signature):
 
         request_path = '/api/account/v3/deposit/address/' + currency.lower()
         return _Resp(self.query(GET, request_path))
+
+
+    def get_total_deposit_value(self, start_date=None, end_date=None, currency='USD'):
+        r""" Retrieves amount that has been deposited between two date.
+
+        Parameters
+        ----------
+        start_date : 	str
+            Start date of query in YYYY-MM-DD.
+
+        end_date : str
+            End date of query in YYYY-MM-DD
+
+        currency : str
+            Currency of deposit. Set to USD by default
+
+        Returns
+        -------
+        value : float
+            Value representing the amount deposited during that date range.
+
+        Examples
+        --------
+        >>> ddep_value = acc.get_total_deposit_value('2021-04-12','2021-06-12')
+        >>> print(dep_value)
+            400.00
+        """
+        if start_date == None:
+            start_date = '2000-01-01'
+        if end_date == None:
+            end_date = datetime.datetime.today().strftime('%Y-%m-%d')
+
+        dep = self.get_deposit_history(currency)
+        df = dep.df
+        df['amount'] = pd.to_numeric(df['amount'])
+        df['updated_at'] = pd.to_datetime(df['updated_at'])
+
+        mask = (df['updated_at'] > start_date) & (df['updated_at'] <= end_date)
+        df = df.loc[mask]
+        val = np.sum(df['amount'].to_list())
+
+        return val
+
 
     def get_deposit_history(self, currency='USD'):
         r""" Retrieves the deposit history of all currencies,
