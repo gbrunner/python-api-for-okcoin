@@ -1239,7 +1239,6 @@ class Earn(_Signature):
             '2': 'Redeeming',
             '3': 'Redeemed'}
 
-
 class Fiat(_Signature):
     """
     The Fiat class is used to withdraw and deposit money into your okcoin account. It enables you to
@@ -1270,7 +1269,7 @@ class Fiat(_Signature):
 
     """
 
-    def get_deposit_history(self, deposit_id):
+    def get_deposit_history(self):
         r""" Returns the details of a deposit given the
         deposit ID.
 
