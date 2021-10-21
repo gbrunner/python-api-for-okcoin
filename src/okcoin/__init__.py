@@ -1334,4 +1334,4 @@ class Fiat(_Signature):
         >>>
         """
         request_path = '/api/account/v3/fiat/withdraw/details'
-        return __Resp(self.query(GET, request_path))
+        return _Resp(self.query(GET, request_path))

@@ -10,3 +10,9 @@ docs/
 *.html
 *.pyc
 C:\Users\gbrunner\Documents\GitHub\python-api-for-okcoin\reports\*
+C:/Users/gbrunner/Documents/GitHub/python-api-for-okcoin/reports/*
+*.csv
+src/okcoin_GBRUNNER.egg-info/top_level.txt
+src/okcoin_GBRUNNER.egg-info/SOURCES.txt
+src/okcoin_GBRUNNER.egg-info/PKG-INFO
+src/okcoin_GBRUNNER.egg-info/dependency_links.txt

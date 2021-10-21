@@ -3,7 +3,7 @@ requires = [
     "setuptools",
     "requests",
     "plotly>=4.14",
-    "pandas>=1.18",
+    "pandas",
     "azure-storage-blob",
     "wheel"
 ]
