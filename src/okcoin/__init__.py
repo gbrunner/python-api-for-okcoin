@@ -500,7 +500,7 @@ class Account(_Signature):
 
         Examples
         --------
-        >>> ddep_value = acc.get_total_deposit_value('2021-04-12','2021-06-12')
+        >>> dep_value = acc.get_total_deposit_value('2021-04-12','2021-06-12')
         >>> print(dep_value)
             400.00
         """

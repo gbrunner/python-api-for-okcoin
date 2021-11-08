@@ -10,6 +10,7 @@ from azure.storage.blob import BlobServiceClient
 
 def upload_to_azure_storage(df,
                             config_file="azure.config",
+                            record_type="ledger",
                             connection_string=None,
                             data_path=None,
                             container_name=None):
@@ -60,7 +61,7 @@ def upload_to_azure_storage(df,
     # Create a file in the local data directory to upload and download
     ts = time.time()
     st = datetime.datetime.fromtimestamp(ts).strftime('%Y%m%d_%H%M%S')
-    local_file_name = "ledger_" + st + ".csv"
+    local_file_name = record_type+"_" + st + ".csv"
     upload_file_path = os.path.join(data_path, local_file_name)
 
     # Write text to the file
@@ -80,6 +81,7 @@ def upload_to_azure_storage(df,
 
 
 def dataframe_from_azure_storage(config_file="azure.config",
+                            filter="ledger",
                             connection_string=None,
                             data_path=None,
                             container_name=None):
@@ -131,16 +133,17 @@ def dataframe_from_azure_storage(config_file="azure.config",
     # List the blobs in the container
     blob_list = container_client.list_blobs()
     for idx, blob in enumerate(blob_list):
-        print("\t" + blob.name)
-        blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob.name)
-        data = blob_client.download_blob().readall()
+        if filter in blob.name:
+            print("\t" + blob.name)
+            blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob.name)
+            data = blob_client.download_blob().readall()
 
-        if idx == 0:
-            df = pd.read_csv(StringIO(data.decode("utf-8")))
-        else:
-            t_df = pd.read_csv(StringIO(data.decode("utf-8")))
-            df = pd.concat([df, t_df])
-            del t_df
+            if idx == 0:
+                df = pd.read_csv(StringIO(data.decode("utf-8")))
+            else:
+                t_df = pd.read_csv(StringIO(data.decode("utf-8")))
+                df = pd.concat([df, t_df])
+                del t_df
 
     df.reset_index(inplace=True)
     try:
@@ -198,3 +201,33 @@ def plot_staking_history(df, currency='BTC'):
         yaxis_title="Value in " + currency)
 
     return fig
+
+
+def upload_ledger_history():
+    from okcoin import Account
+    acc = Account(r"C:\Users\gbrunner\Documents\GitHub\python-api-for-okcoin\src\auth.config")
+    ledger = acc.get_ledger()
+    df = upload_to_azure_storage(ledger.df,
+                                 r"C:\Users\gbrunner\Documents\GitHub\python-api-for-okcoin\src\azure.config",
+                                 "ledger")
+    return df
+
+
+def upload_order_history(pairs=['STX-USD', 'MIA-USD','XTZ-USD'], state=7):
+    from okcoin import Spot
+    spot = Spot(r"C:\Users\gbrunner\Documents\GitHub\python-api-for-okcoin\src\auth.config")
+    for idx,pair in enumerate(pairs):
+        orders = spot.get_order_list(pair, state=str(state))
+        if idx == 0:
+            df = orders.df
+        else:
+            t_df = orders.df
+            df = pd.concat([df, t_df])
+
+    df.reset_index(inplace=True)
+
+    upload_to_azure_storage(df,
+                            r"C:\Users\gbrunner\Documents\GitHub\python-api-for-okcoin\src\azure.config",
+                            "filled_orders")
+
+    return df
