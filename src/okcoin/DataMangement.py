@@ -132,13 +132,19 @@ def dataframe_from_azure_storage(config_file="azure.config",
 
     # List the blobs in the container
     blob_list = container_client.list_blobs()
+    #for bl in blob_list:
+    #    if filter in bl.name:
+    #        print(bl.name)
+
+    start = True
     for idx, blob in enumerate(blob_list):
         if filter in blob.name:
             print("\t" + blob.name)
             blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob.name)
             data = blob_client.download_blob().readall()
 
-            if idx == 0:
+            if start: #idx == 0:
+                start = False
                 df = pd.read_csv(StringIO(data.decode("utf-8")))
             else:
                 t_df = pd.read_csv(StringIO(data.decode("utf-8")))
