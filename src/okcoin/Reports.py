@@ -23,6 +23,7 @@ def plot_stx_staking():
 
 def plot_mia_staking():
     mia_df = get_mia_returns()
+    mia_df['timestamp'] = mia_df['timestamp'].astype('datetime64[D]')
     fig = go.Figure(data=[go.Bar(x=mia_df['timestamp'], y=mia_df['amount'])])
     fig.update_layout(
         title='STX from MiamiCoin Staking',
@@ -35,6 +36,7 @@ def plot_mia_staking():
 
 def plot_cumulative_mia_staking():
     mia_df = get_mia_returns()
+    mia_df['timestamp'] = mia_df['timestamp'].astype('datetime64[D]')
     mia_df['cumsum'] = mia_df['amount'].cumsum()
     mia_df.drop_duplicates(keep='first', subset=['timestamp'], inplace=True)
     fig = go.Figure(data=[go.Bar(x=mia_df['timestamp'], y=mia_df['cumsum'])])
